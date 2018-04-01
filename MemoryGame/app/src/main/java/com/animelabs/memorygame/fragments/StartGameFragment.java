@@ -43,7 +43,7 @@ public class StartGameFragment extends Fragment implements StartGameView{
     @OnClick(R.id.start_game)
     public void onButtonClick(View view) {
         if(getActivity() != null && getActivity() instanceof ContainerActivity) {
-            ((ContainerActivity) getActivity()).replaceFragment(new PlayGameFragment());
+            ((ContainerActivity) getActivity()).replaceFragment(new PlayGameFragment(), ContainerActivity.TAG_FRAGMENT_PLAY);
         }
     }
 }

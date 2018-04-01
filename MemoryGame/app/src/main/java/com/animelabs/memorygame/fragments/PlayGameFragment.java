@@ -32,6 +32,7 @@ import com.animelabs.memorygame.views.PlayGameView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Random;
 
@@ -49,6 +50,7 @@ public class PlayGameFragment extends Fragment implements PlayGameView, GridAdap
     private GridAdapter gridAdapter;
     private PlayGamePresenter presenter;
     private ImageItems mImageItem;
+    private List<ImageItems> mImageItemsList;
     private int totalCount = 0;
 
     @BindView(R.id.recyclerView)
@@ -63,6 +65,7 @@ public class PlayGameFragment extends Fragment implements PlayGameView, GridAdap
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRetainInstance(true);
         presenter = new PlayGamePresenterImpl();
         presenter.attach(this, new PlayGameInteractorImpl());
         presenter.fetchItems();
@@ -107,41 +110,49 @@ public class PlayGameFragment extends Fragment implements PlayGameView, GridAdap
 
     @Override
     public void setData(final List<ImageItems> imageItems) {
-        gridAdapter = new GridAdapter(getContext(), imageItems);
-        gridAdapter.setShowHide(true);
-        gridAdapter.setClickListener(this);
-        mRecyclerView.setAdapter(gridAdapter);
-        mRefresh.setVisibility(View.GONE);
-        mRecyclerView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        new CountDownTimer(10000, 1000) {
-                            public void onTick(long millisUntilFinished) {
-                                mTimerView.setText(millisUntilFinished / 1000 + "");
-                            }
+        Log.d("Clled", "called");
+        mImageItemsList = imageItems;
+        if (mImageItemsList.size() > 0) {
+            gridAdapter = new GridAdapter(getContext(), mImageItemsList);
+            gridAdapter.setShowHide(true);
+            gridAdapter.setClickListener(this);
+            mRecyclerView.setAdapter(gridAdapter);
+            mRefresh.setVisibility(View.GONE);
+            mRecyclerView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            new CountDownTimer(10000, 1000) {
+                                public void onTick(long millisUntilFinished) {
+                                    mTimerView.setText(millisUntilFinished / 1000 + "");
+                                }
 
-                            public void onFinish() {
-                                mTimerView.setText("Time Over");
-                                gridAdapter.setShowHide(false);
-                                gridAdapter.notifyDataSetChanged();
-                                mImageItem = getRandomImageItem(imageItems);
-                                Glide.with(getContext()).load(mImageItem.getMedia().getM()).apply(new RequestOptions().placeholder(R.mipmap.ic_launcher)).into(mImageView);
-                            }
-                        }.start();
+                                public void onFinish() {
+                                    mTimerView.setText("Time Over");
+                                    gridAdapter.setShowHide(false);
+                                    gridAdapter.notifyDataSetChanged();
+                                    mImageItem = getRandomImageItem(imageItems);
+                                    if (getContext() != null) {
+                                        Glide.with(getContext()).load(mImageItem.getMedia().getM()).apply(new RequestOptions().placeholder(R.mipmap.ic_launcher)).into(mImageView);
+                                    }
+
+                                }
+                            }.start();
+                        }
+                    }, 1500);
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                        mRecyclerView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    } else {
+                        mRecyclerView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
                     }
-                }, 1500);
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    mRecyclerView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                } else {
-                    mRecyclerView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
                 }
-            }
-        });
+            });
+        }
+
     }
 
     @Override
@@ -231,6 +242,31 @@ public class PlayGameFragment extends Fragment implements PlayGameView, GridAdap
             return items.get((new Random()).nextInt(items.size()));
         } catch (Throwable e) {
             return null;
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean("IS_PROGRESS", progressDialg.isShowing());
+        outState.putSerializable("DATA", (Serializable) mImageItemsList);
+        outState.putSerializable("DATA2", (Serializable) mImageItem);
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        if (savedInstanceState != null) {
+            if (savedInstanceState.getBoolean("IS_PROGRESS")) {
+                showProgress();
+            }
+            mImageItemsList = (List<ImageItems>) savedInstanceState.getSerializable("DATA");
+            mImageItem = (ImageItems) savedInstanceState.getSerializable("DATA2");
+            if (mImageItemsList != null && mImageItemsList.size() > 0) {
+                gridAdapter.setData(mImageItemsList);
+                mRecyclerView.setAdapter(gridAdapter);
+//                gridAdapter.notifyDataSetChanged();
+            }
         }
     }
 }

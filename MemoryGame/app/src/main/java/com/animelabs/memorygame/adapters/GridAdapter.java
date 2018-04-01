@@ -32,6 +32,12 @@ public class GridAdapter extends RecyclerView.Adapter<GridAdapter.ViewHolder> {
         this.mData = data;
     }
 
+    public void setData(List<ImageItems> data) {
+        this.mData.clear();
+        this.mData.addAll(data);
+        this.notifyDataSetChanged();
+    }
+
     public void setShowHide(boolean showHide) {
         mShowHide = showHide;
     }
@@ -51,26 +57,29 @@ public class GridAdapter extends RecyclerView.Adapter<GridAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         ImageItems imageItems = mData.get(position);
-        if (mShowHide || (selectedPosition  != -1 && selectedPosition == position)) {
-            Glide.with(mInflater.getContext())
-                    .load(imageItems.getMedia().getM()).apply(new RequestOptions()
-                    .placeholder(R.mipmap.ic_launcher)
-                    .fitCenter())
-                    .into(holder.imageView);
-        } else {
-            Glide.with(mInflater.getContext())
-                    .load(R.mipmap.ic_launcher).apply(new RequestOptions()
-                    .placeholder(R.mipmap.ic_launcher)
-                    .fitCenter())
-                    .into(holder.imageView);
+        if (mInflater.getContext() != null) {
+            if (mShowHide || (selectedPosition != -1 && selectedPosition == position)) {
+                Glide.with(mInflater.getContext())
+                        .load(imageItems.getMedia().getM()).apply(new RequestOptions()
+                        .placeholder(R.mipmap.ic_launcher)
+                        .fitCenter())
+                        .into(holder.imageView);
+            } else {
+                Glide.with(mInflater.getContext())
+                        .load(R.mipmap.ic_launcher).apply(new RequestOptions()
+                        .placeholder(R.mipmap.ic_launcher)
+                        .fitCenter())
+                        .into(holder.imageView);
+            }
         }
+
 
     }
 
     // total number of cells
     @Override
     public int getItemCount() {
-        return mData.size() > 9 ? 9 : mData.size();
+        return mData.size();
     }
 
 

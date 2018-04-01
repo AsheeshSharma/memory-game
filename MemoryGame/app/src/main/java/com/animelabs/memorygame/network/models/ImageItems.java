@@ -3,12 +3,14 @@ package com.animelabs.memorygame.network.models;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
+
 /**
  * Created by asheeshsharma on 01/04/18.
  * ImageItems
  */
 
-public class ImageItems {
+public class ImageItems implements Serializable{
 
     @SerializedName("title")
     private String title;
@@ -28,6 +30,20 @@ public class ImageItems {
     private String authorId;
     @SerializedName("tags")
     private String tags;
+
+    public ImageItems(String title, String link, Media media, String dateTaken, String description, String published, String author, String authorId, String tags) {
+        this.title = title;
+        this.link = link;
+        this.media = media;
+        this.dateTaken = dateTaken;
+        this.description = description;
+        this.published = published;
+        this.author = author;
+        this.authorId = authorId;
+        this.tags = tags;
+    }
+
+    public ImageItems(){}
 
     public String getTitle() {
         return title;

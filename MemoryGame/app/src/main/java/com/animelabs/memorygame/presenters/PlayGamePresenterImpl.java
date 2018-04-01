@@ -6,6 +6,7 @@ import com.animelabs.memorygame.network.models.ApiResponse;
 import com.animelabs.memorygame.network.models.ImageItems;
 import com.animelabs.memorygame.views.PlayGameView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -62,7 +63,8 @@ public class PlayGamePresenterImpl implements PlayGamePresenter, PlayGameInterac
         List<ImageItems> imageItems = apiResponse.getItems();
         if(mPlayGameView != null) {
             if(imageItems.size() >= 9) {
-                mPlayGameView.setData(imageItems.subList(0, 10));
+                List<ImageItems> subList = new ArrayList<ImageItems>(imageItems.subList(0, 9));
+                mPlayGameView.setData(subList);
             }else {
                 mPlayGameView.showMessage(R.string.error_items);
             }
