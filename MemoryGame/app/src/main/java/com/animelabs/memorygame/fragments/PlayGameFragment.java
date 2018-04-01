@@ -52,6 +52,8 @@ public class PlayGameFragment extends Fragment implements PlayGameView, GridAdap
     private ImageItems mImageItem;
     private List<ImageItems> mImageItemsList;
     private int totalCount = 0;
+    private boolean shouldShowHide = true;
+    private int selectedPosition = -1;
 
     @BindView(R.id.recyclerView)
     RecyclerView mRecyclerView;
@@ -114,7 +116,7 @@ public class PlayGameFragment extends Fragment implements PlayGameView, GridAdap
         mImageItemsList = imageItems;
         if (mImageItemsList.size() > 0) {
             gridAdapter = new GridAdapter(getContext(), mImageItemsList);
-            gridAdapter.setShowHide(true);
+            gridAdapter.setShowHide(shouldShowHide);
             gridAdapter.setClickListener(this);
             mRecyclerView.setAdapter(gridAdapter);
             mRefresh.setVisibility(View.GONE);
@@ -132,7 +134,8 @@ public class PlayGameFragment extends Fragment implements PlayGameView, GridAdap
 
                                 public void onFinish() {
                                     mTimerView.setText("Time Over");
-                                    gridAdapter.setShowHide(false);
+                                    shouldShowHide = false;
+                                    gridAdapter.setShowHide(shouldShowHide);
                                     gridAdapter.notifyDataSetChanged();
                                     mImageItem = getRandomImageItem(imageItems);
                                     if (getContext() != null) {
@@ -179,6 +182,7 @@ public class PlayGameFragment extends Fragment implements PlayGameView, GridAdap
 
     @Override
     public void onWinGame(int position) {
+        selectedPosition = position;
         gridAdapter.setSelectedPosition(position);
         gridAdapter.notifyDataSetChanged();
         mRefresh.setVisibility(View.VISIBLE);
@@ -187,6 +191,7 @@ public class PlayGameFragment extends Fragment implements PlayGameView, GridAdap
 
     @Override
     public void onLostGame(int position) {
+        selectedPosition = position;
         gridAdapter.setSelectedPosition(position);
         gridAdapter.notifyDataSetChanged();
         if (totalCount == 1) {
@@ -197,40 +202,6 @@ public class PlayGameFragment extends Fragment implements PlayGameView, GridAdap
 
     @Override
     public void onItemClick(int position, ImageItems data) {
-        /*if (totalCount < 2) {
-            if (mImageItem.getMedia().getM().contentEquals(data.getMedia().getM())) {
-                if (getView() != null) {
-                    Snackbar snackbar = Snackbar
-                            .make(getView(), "You Win! Refresh to try again!", Snackbar.LENGTH_SHORT);
-                    snackbar.show();
-                } else {
-                    Toast.makeText(getContext(), "You Win! Refresh to try again!", Toast.LENGTH_SHORT).show();
-                }
-                gridAdapter.setSelectedPosition(position);
-                gridAdapter.notifyDataSetChanged();
-                mRefresh.setVisibility(View.VISIBLE);
-                totalCount = 2;
-            } else {
-                gridAdapter.setSelectedPosition(position);
-                gridAdapter.notifyDataSetChanged();
-                String text = "";
-                if (totalCount == 0) {
-                    text = "Uh Oh! Last Chance";
-
-                } else {
-                    mRefresh.setVisibility(View.VISIBLE);
-                    mRefresh.setEnabled(true);
-                    text = "Please Hit Refresh to Play Again!";
-                }
-                if (getView() != null) {
-                    Snackbar snackbar = Snackbar
-                            .make(getView(), text, Snackbar.LENGTH_SHORT);
-                    snackbar.show();
-                } else {
-                    Toast.makeText(getContext(), text, Toast.LENGTH_SHORT).show();
-                }
-            }
-        }*/
         if (mTimerView.getText().toString().contentEquals("Time Over")) {
             presenter.onItemClicked(totalCount, mImageItem, data, position);
             totalCount = totalCount + 1;
@@ -249,8 +220,10 @@ public class PlayGameFragment extends Fragment implements PlayGameView, GridAdap
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean("IS_PROGRESS", progressDialg.isShowing());
+        outState.putBoolean("SHOULD_SHOW_HIDE", shouldShowHide);
         outState.putSerializable("DATA", (Serializable) mImageItemsList);
         outState.putSerializable("DATA2", (Serializable) mImageItem);
+        outState.putSerializable("SELECTED_POSITION", (Serializable) mImageItem);
     }
 
     @Override
@@ -262,8 +235,14 @@ public class PlayGameFragment extends Fragment implements PlayGameView, GridAdap
             }
             mImageItemsList = (List<ImageItems>) savedInstanceState.getSerializable("DATA");
             mImageItem = (ImageItems) savedInstanceState.getSerializable("DATA2");
+            shouldShowHide = savedInstanceState.getBoolean("SHOULD_SHOW_HIDE");
+            selectedPosition = savedInstanceState.getInt("SELECTED_POSITION");
             if (mImageItemsList != null && mImageItemsList.size() > 0) {
-                gridAdapter.setData(mImageItemsList);
+                gridAdapter = new GridAdapter(getContext(), mImageItemsList);
+                gridAdapter.setShowHide(shouldShowHide);
+                gridAdapter.setSelectedPosition(selectedPosition);
+                gridAdapter.setClickListener(this);
+                mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 3));
                 mRecyclerView.setAdapter(gridAdapter);
 //                gridAdapter.notifyDataSetChanged();
             }

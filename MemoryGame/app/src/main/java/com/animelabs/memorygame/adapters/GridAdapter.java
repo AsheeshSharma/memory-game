@@ -43,7 +43,9 @@ public class GridAdapter extends RecyclerView.Adapter<GridAdapter.ViewHolder> {
     }
 
     public void setSelectedPosition(int position) {
-        selectedPosition = position;
+        if(position > 0) {
+            selectedPosition = position;
+        }
     }
 
     // inflates the cell layout from xml when needed
