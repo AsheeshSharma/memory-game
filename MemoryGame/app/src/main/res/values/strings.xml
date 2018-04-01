@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Memory Game</string>
+    <string name="error_items">No Images Exists!</string>
+    <string name="win_message">You Win! Refresh to try again!</string>
+</resources>
