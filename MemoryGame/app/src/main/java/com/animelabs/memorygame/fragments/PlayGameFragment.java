@@ -222,6 +222,7 @@ public class PlayGameFragment extends Fragment implements PlayGameView, GridAdap
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        // Can be converted to a single class that holds everything
         outState.putBoolean("IS_PROGRESS", progressDialg.isShowing());
         outState.putBoolean("SHOULD_SHOW_HIDE", shouldShowHide);
         outState.putSerializable("DATA", (Serializable) mImageItemsList);
@@ -235,33 +236,35 @@ public class PlayGameFragment extends Fragment implements PlayGameView, GridAdap
     public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
         if (savedInstanceState != null) {
-            if (savedInstanceState.getBoolean("IS_PROGRESS")) {
-                showProgress();
-            }
-            mImageItemsList = (List<ImageItems>) savedInstanceState.getSerializable("DATA");
-            mImageItem = (ImageItems) savedInstanceState.getSerializable("DATA2");
-            shouldShowHide = savedInstanceState.getBoolean("SHOULD_SHOW_HIDE");
-            selectedPosition = savedInstanceState.getInt("SELECTED_POSITION");
-            totalCount = savedInstanceState.getInt("TOTAL_COUNT");
-            if(totalCount == 2) {
-                mRefresh.setVisibility(View.VISIBLE);
-            }
-            if (mImageItemsList != null && mImageItemsList.size() > 0) {
-                gridAdapter = new GridAdapter(getContext(), mImageItemsList);
-                gridAdapter.setShowHide(shouldShowHide);
-                gridAdapter.setSelectedPosition(selectedPosition);
-                gridAdapter.setClickListener(this);
-                if(mTimerView.getText().toString().contentEquals("Timer")) {
-                    mTimerView.setText("Time Over");
-                    if (getContext() != null) {
-                        Glide.with(getContext()).load(mImageItem.getMedia().getM()).apply(new RequestOptions().placeholder(R.mipmap.ic_launcher)).into(mImageView);
-                    }
+            setUpOrientationChanges(savedInstanceState);
+        }
+    }
+
+    public void setUpOrientationChanges(@Nullable Bundle savedInstanceState) {
+        if (savedInstanceState.getBoolean("IS_PROGRESS")) {
+            showProgress();
+        }
+        mImageItemsList = (List<ImageItems>) savedInstanceState.getSerializable("DATA");
+        mImageItem = (ImageItems) savedInstanceState.getSerializable("DATA2");
+        shouldShowHide = savedInstanceState.getBoolean("SHOULD_SHOW_HIDE");
+        selectedPosition = savedInstanceState.getInt("SELECTED_POSITION");
+        totalCount = savedInstanceState.getInt("TOTAL_COUNT");
+        if(totalCount == 2) {
+            mRefresh.setVisibility(View.VISIBLE);
+        }
+        if (mImageItemsList != null && mImageItemsList.size() > 0) {
+            gridAdapter = new GridAdapter(getContext(), mImageItemsList);
+            gridAdapter.setShowHide(shouldShowHide);
+            gridAdapter.setSelectedPosition(selectedPosition);
+            gridAdapter.setClickListener(this);
+            if(mTimerView.getText().toString().contentEquals("Timer")) {
+                mTimerView.setText("Time Over");
+                if (getContext() != null) {
+                    Glide.with(getContext()).load(mImageItem.getMedia().getM()).apply(new RequestOptions().placeholder(R.mipmap.ic_launcher)).into(mImageView);
                 }
-                mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 3));
-                mRecyclerView.setAdapter(gridAdapter);
-//                setData(mImageItemsList);
-//                gridAdapter.notifyDataSetChanged();
             }
+            mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 3));
+            mRecyclerView.setAdapter(gridAdapter);
         }
     }
 }
