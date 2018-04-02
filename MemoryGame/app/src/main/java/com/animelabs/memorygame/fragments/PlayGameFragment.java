@@ -54,6 +54,7 @@ public class PlayGameFragment extends Fragment implements PlayGameView, GridAdap
     private int totalCount = 0;
     private boolean shouldShowHide = true;
     private int selectedPosition = -1;
+    long timeLeft;
 
     @BindView(R.id.recyclerView)
     RecyclerView mRecyclerView;
@@ -132,12 +133,28 @@ public class PlayGameFragment extends Fragment implements PlayGameView, GridAdap
                         @Override
                         public void run() {
                             new CountDownTimer(10000, 1000) {
-                                public void onTick(long millisUntilFinished) {
-                                    mTimerView.setText(millisUntilFinished / 1000 + "");
+                                public void onTick(final long millisUntilFinished) {
+                                    if (getContext() != null) {
+                                        getActivity().runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                timeLeft = millisUntilFinished / 1000;
+                                                mTimerView.setText(millisUntilFinished / 1000 + "");
+                                            }
+                                        });
+                                    }
                                 }
 
                                 public void onFinish() {
-                                    mTimerView.setText("Time Over");
+                                    if (getContext() != null) {
+                                        getActivity().runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                mTimerView.setText("Time Over");
+                                            }
+                                        });
+                                    }
+
                                     shouldShowHide = false;
                                     gridAdapter.setShowHide(shouldShowHide);
                                     gridAdapter.notifyDataSetChanged();
@@ -249,7 +266,8 @@ public class PlayGameFragment extends Fragment implements PlayGameView, GridAdap
         shouldShowHide = savedInstanceState.getBoolean("SHOULD_SHOW_HIDE");
         selectedPosition = savedInstanceState.getInt("SELECTED_POSITION");
         totalCount = savedInstanceState.getInt("TOTAL_COUNT");
-        if(totalCount == 2) {
+        String timerText = savedInstanceState.getString("TIMER_TEXT");
+        if (totalCount == 2) {
             mRefresh.setVisibility(View.VISIBLE);
         }
         if (mImageItemsList != null && mImageItemsList.size() > 0) {
@@ -257,7 +275,7 @@ public class PlayGameFragment extends Fragment implements PlayGameView, GridAdap
             gridAdapter.setShowHide(shouldShowHide);
             gridAdapter.setSelectedPosition(selectedPosition);
             gridAdapter.setClickListener(this);
-            if(mTimerView.getText().toString().contentEquals("Timer")) {
+            if (timerText.contentEquals("Timer") || timerText.contentEquals("Time Over")) {
                 mTimerView.setText("Time Over");
                 if (getContext() != null) {
                     Glide.with(getContext()).load(mImageItem.getMedia().getM()).apply(new RequestOptions().placeholder(R.mipmap.ic_launcher)).into(mImageView);
