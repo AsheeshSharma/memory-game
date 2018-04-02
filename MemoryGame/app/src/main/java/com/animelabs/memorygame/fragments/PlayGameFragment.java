@@ -88,6 +88,8 @@ public class PlayGameFragment extends Fragment implements PlayGameView, GridAdap
         presenter.fetchItems();
         mRefresh.setVisibility(View.GONE);
         totalCount = 0;
+        selectedPosition = -1;
+        shouldShowHide = true;
     }
 
     public void setUpViews() {
@@ -116,10 +118,12 @@ public class PlayGameFragment extends Fragment implements PlayGameView, GridAdap
         mImageItemsList = imageItems;
         if (mImageItemsList.size() > 0) {
             gridAdapter = new GridAdapter(getContext(), mImageItemsList);
+            shouldShowHide = true;
             gridAdapter.setShowHide(shouldShowHide);
             gridAdapter.setClickListener(this);
             mRecyclerView.setAdapter(gridAdapter);
             mRefresh.setVisibility(View.GONE);
+            mImageItem = getRandomImageItem(imageItems);
             mRecyclerView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
                 public void onGlobalLayout() {
@@ -137,7 +141,6 @@ public class PlayGameFragment extends Fragment implements PlayGameView, GridAdap
                                     shouldShowHide = false;
                                     gridAdapter.setShowHide(shouldShowHide);
                                     gridAdapter.notifyDataSetChanged();
-                                    mImageItem = getRandomImageItem(imageItems);
                                     if (getContext() != null) {
                                         Glide.with(getContext()).load(mImageItem.getMedia().getM()).apply(new RequestOptions().placeholder(R.mipmap.ic_launcher)).into(mImageView);
                                     }
@@ -223,7 +226,9 @@ public class PlayGameFragment extends Fragment implements PlayGameView, GridAdap
         outState.putBoolean("SHOULD_SHOW_HIDE", shouldShowHide);
         outState.putSerializable("DATA", (Serializable) mImageItemsList);
         outState.putSerializable("DATA2", (Serializable) mImageItem);
-        outState.putSerializable("SELECTED_POSITION", (Serializable) mImageItem);
+        outState.putString("TIMER_TEXT", mTimerView.getText().toString());
+        outState.putInt("TOTAL_COUNT", totalCount);
+        outState.putSerializable("SELECTED_POSITION", selectedPosition);
     }
 
     @Override
@@ -237,13 +242,24 @@ public class PlayGameFragment extends Fragment implements PlayGameView, GridAdap
             mImageItem = (ImageItems) savedInstanceState.getSerializable("DATA2");
             shouldShowHide = savedInstanceState.getBoolean("SHOULD_SHOW_HIDE");
             selectedPosition = savedInstanceState.getInt("SELECTED_POSITION");
+            totalCount = savedInstanceState.getInt("TOTAL_COUNT");
+            if(totalCount == 2) {
+                mRefresh.setVisibility(View.VISIBLE);
+            }
             if (mImageItemsList != null && mImageItemsList.size() > 0) {
                 gridAdapter = new GridAdapter(getContext(), mImageItemsList);
                 gridAdapter.setShowHide(shouldShowHide);
                 gridAdapter.setSelectedPosition(selectedPosition);
                 gridAdapter.setClickListener(this);
+                if(mTimerView.getText().toString().contentEquals("Timer")) {
+                    mTimerView.setText("Time Over");
+                    if (getContext() != null) {
+                        Glide.with(getContext()).load(mImageItem.getMedia().getM()).apply(new RequestOptions().placeholder(R.mipmap.ic_launcher)).into(mImageView);
+                    }
+                }
                 mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 3));
                 mRecyclerView.setAdapter(gridAdapter);
+//                setData(mImageItemsList);
 //                gridAdapter.notifyDataSetChanged();
             }
         }

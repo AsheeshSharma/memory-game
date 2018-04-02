@@ -3,7 +3,9 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/MemoryGame.iml" filepath="$PROJECT_DIR$/MemoryGame.iml" />
+      <module fileurl="file://C:\Users\a35764\Documents\GitHub\memory-game\MemoryGame\MemoryGame.iml" filepath="C:\Users\a35764\Documents\GitHub\memory-game\MemoryGame\MemoryGame.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://C:\Users\a35764\Documents\GitHub\memory-game\MemoryGame\app\app.iml" filepath="C:\Users\a35764\Documents\GitHub\memory-game\MemoryGame\app\app.iml" />
     </modules>
   </component>
 </project>
